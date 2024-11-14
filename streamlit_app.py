@@ -4,11 +4,11 @@ import requests
 import pydeck as pdk
 from io import BytesIO
 
-# 네이버 API 정보임
+# 네이버 API 정보
 CLIENT_ID = 'buzzqnu77m'
 CLIENT_SECRET = 'QkOrNDd4v57qIR2WKrE1gNO7WKKYeiXUMtjjfTAN'
 
-# Geocoding API 호출 함수ff
+# Geocoding API 호출 함수
 def get_coordinates(address):
     url = f"https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode"
     headers = {
@@ -30,7 +30,7 @@ def get_coordinates(address):
         return None, None
 
 # 스트림릿 UI
-st.title("주소로 위경도 찾기 ")
+st.title("주소로 위경도 찾기")
 st.write("네이버 지도 API를 사용하여 주소를 위경도로 변환합니다.")
 
 # 주소 입력 방식 선택
@@ -44,7 +44,7 @@ if input_mode == "CSV 파일 업로드":
         try:
             df = pd.read_csv(uploaded_file)
             if 'address' in df.columns:
-                addresses = df['address'].tolist()
+                addresses = df['address'].dropna().tolist()  # NaN 값 제거
             else:
                 st.error("CSV 파일에 'address' 열이 없습니다.")
         except Exception as e:
@@ -52,7 +52,7 @@ if input_mode == "CSV 파일 업로드":
 else:
     address_input = st.text_area("주소를 한 줄에 하나씩 입력하세요")
     if address_input:
-        addresses = address_input.split("\n")
+        addresses = [address.strip() for address in address_input.split("\n") if address.strip()]
 
 # 결과 처리
 if st.button("위경도 변환"):
@@ -60,12 +60,15 @@ if st.button("위경도 변환"):
         results = []
         for address in addresses:
             lat, lon = get_coordinates(address)
-            results.append({"주소": address, "위도": lat, "경도": lon})
+            if lat and lon:
+                results.append({"주소": address, "위도": lat, "경도": lon})
+            else:
+                results.append({"주소": address, "위도": "변환 실패", "경도": "변환 실패"})
         
         result_df = pd.DataFrame(results)
         
         # 결과 표시
-        st.subheader("변환 결과 ")
+        st.subheader("변환 결과")
         st.dataframe(result_df)
         
         # 엑셀 파일 다운로드 링크 생성
