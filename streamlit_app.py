@@ -4,7 +4,7 @@ import requests
 import pydeck as pdk
 from io import BytesIO
 
-# 네이버 API 정보
+# 네이버 API 정보임
 CLIENT_ID = 'buzzqnu77m'
 CLIENT_SECRET = 'QkOrNDd4v57qIR2WKrE1gNO7WKKYeiXUMtjjfTAN'
 
@@ -30,7 +30,7 @@ def get_coordinates(address):
         return None, None
 
 # 스트림릿 UI
-st.title("주소로 위경도 찾기")
+st.title("주소로 위경도 찾기 ")
 st.write("네이버 지도 API를 사용하여 주소를 위경도로 변환합니다.")
 
 # 주소 입력 방식 선택
