@@ -65,7 +65,7 @@ if st.button("위경도 변환"):
         result_df = pd.DataFrame(results)
         
         # 결과 표시
-        st.subheader("변환 결과")
+        st.subheader("변환 결과 ")
         st.dataframe(result_df)
         
         # 엑셀 파일 다운로드 링크 생성
