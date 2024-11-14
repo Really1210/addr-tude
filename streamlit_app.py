@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import requests
 import json
-from io import BytesIO
 
 # 네이버 API 정보
 CLIENT_ID = 'buzzqnu77m'
@@ -26,7 +25,7 @@ def get_coordinates(address):
         else:
             return None, None
     except Exception as e:
-        st.error(f"API 호출 오류 : {e}")
+        st.error(f"API 호출 오류: {e}")
         return None, None
 
 # 스트림릿 UI
@@ -71,18 +70,6 @@ if st.button("위경도 변환"):
         st.subheader("변환 결과")
         st.dataframe(result_df)
         
-        # 엑셀 파일 다운로드 링크 생성
-        output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            result_df.to_excel(writer, index=False)
-        output.seek(0)  # BytesIO 객체의 시작 부분으로 이동
-        st.download_button(
-            label="엑셀 파일로 다운로드",
-            data=output,
-            file_name="coordinates.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-        
         # GeoJSON 형식으로 변환
         geojson = {
             "type": "FeatureCollection",
@@ -112,10 +99,6 @@ if st.button("위경도 변환"):
             file_name="coordinates.geojson",
             mime="application/geo+json"
         )
-        
-        # GeoJSON 출력 (디버깅용)
-        st.subheader("GeoJSON 형식 출력")
-        st.json(geojson)
 
     else:
         st.error("주소를 입력하세요.")
