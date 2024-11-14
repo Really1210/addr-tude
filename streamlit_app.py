@@ -26,7 +26,7 @@ def get_coordinates(address):
         else:
             return None, None
     except Exception as e:
-        st.error(f"API 호출 오류: {e}")
+        st.error(f"API 호출 오류 : {e}")
         return None, None
 
 # 스트림릿 UI
