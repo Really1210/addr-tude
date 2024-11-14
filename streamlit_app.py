@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import requests
-import pydeck as pdk
+import json
 from io import BytesIO
 
 # 네이버 API 정보
@@ -83,32 +83,39 @@ if st.button("위경도 변환"):
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
         
-        # 지도 시각화
-        st.subheader("지도 시각화")
-        map_data = result_df.dropna(subset=["위도", "경도"])
-        if not map_data.empty:
-            st.pydeck_chart(
-                pdk.Deck(
-                    map_style='mapbox://styles/mapbox/streets-v11',
-                    initial_view_state=pdk.ViewState(
-                        latitude=map_data["위도"].mean(),
-                        longitude=map_data["경도"].mean(),
-                        zoom=10,
-                        pitch=0,
-                    ),
-                    layers=[
-                        pdk.Layer(
-                            "ScatterplotLayer",
-                            data=map_data,
-                            get_position="[경도, 위도]",
-                            get_radius=200,
-                            get_color=[0, 0, 255],
-                            pickable=True,
-                        ),
-                    ],
-                )
-            )
-        else:
-            st.warning("유효한 위경도 데이터가 없습니다.")
+        # GeoJSON 형식으로 변환
+        geojson = {
+            "type": "FeatureCollection",
+            "features": []
+        }
+        
+        for _, row in result_df.iterrows():
+            if row["위도"] != "변환 실패" and row["경도"] != "변환 실패":
+                feature = {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [row["경도"], row["위도"]]
+                    },
+                    "properties": {
+                        "address": row["주소"]
+                    }
+                }
+                geojson["features"].append(feature)
+        
+        # GeoJSON 다운로드 링크 생성
+        geojson_str = json.dumps(geojson, ensure_ascii=False)
+        st.subheader("GeoJSON 파일 다운로드")
+        st.download_button(
+            label="GeoJSON 파일로 다운로드",
+            data=geojson_str,
+            file_name="coordinates.geojson",
+            mime="application/geo+json"
+        )
+        
+        # GeoJSON 출력 (디버깅용)
+        st.subheader("GeoJSON 형식 출력")
+        st.json(geojson)
+
     else:
         st.error("주소를 입력하세요.")
